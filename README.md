@@ -50,7 +50,7 @@ npm run preview
 
 ## GitHub Pages 배포
 
-현재 원격 저장소 생성, push, 공개 배포는 수행하지 않았습니다. 사용자가 대상 저장소와 공개 범위를 확인한 다음 진행합니다.
+설정된 원격 저장소는 https://github.com/SanChoPaMaSan/kickboxing-viewer.git 입니다. 아래는 기존 HW2 Pages 배포 절차이며, 이번 HW3 작업에서는 원격 push와 실제 배포를 수행하지 않았습니다.
 
 1. 이 폴더의 내용을 GitHub 저장소 루트에 올립니다. `.github`와 `.gitignore`도 포함합니다.
 2. 저장소 Settings → Pages → Build and deployment → Source를 **GitHub Actions**로 선택합니다.
@@ -61,6 +61,15 @@ npm run preview
 Vite `base: './'`로 빌드 에셋 경로를 상대 경로로 생성합니다. 따라서 `/저장소이름/`에서도 로딩할 수 있습니다. 별도의 클라이언트 라우팅은 없습니다. 인증 토큰을 소스에 넣지 않으며 배포에는 GitHub의 기본 작업 토큰과 OIDC 권한을 사용합니다.
 
 공식 참고: https://vite.dev/guide/static-deploy.html#github-pages
+
+## HW3 Docker와 CI/CD
+
+기존 앱을 Docker로 실행하고 Linux Self-hosted Runner에서 새 컨테이너를 검증한 뒤 Nginx 트래픽을 전환하는 구성을 추가했습니다. 기존 Pages 워크플로와 별도로 `.github/workflows/hw3.yml`이 실행됩니다.
+
+- 설정 및 실행: [HW3_SETUP.md](docs/HW3_SETUP.md)
+- 현재 검증 상태와 제출 증빙: [HW3_STATUS.md](docs/HW3_STATUS.md)
+- Docker Hub 계정 설정 전에는 컨테이너 CI만 실행됩니다. 서버 배포는 `HW3_DEPLOY_ENABLED=true` 설정 후 활성화됩니다.
+- 이 앱은 머신러닝 모델을 사용하지 않습니다. 3D 캐릭터를 ML 모델로 간주하지 않으며 MLOps 요구사항은 별도 확인이 필요합니다.
 
 ## 에셋과 라이선스
 
