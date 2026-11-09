@@ -27,7 +27,7 @@ Docker Hub에서 `strikelab` 저장소를 만들고 이미지 push 권한의 액
 
 ## 3. 배포 서버와 Runner
 
-Linux x64 서버에 Docker Engine과 Python 3를 준비한다. 기본 서비스 포트는 8080이다. 다른 서비스가 이 포트를 점유하면 안 된다. 서버 방화벽과 클라우드 보안 그룹의 인바운드 포트도 확인한다. 이 구성은 실습용 HTTP이며 HTTPS는 도메인과 인증서를 연결하는 추가 설정이 필요하다.
+Linux x64 서버에 Docker Engine과 Python 3를 준비한다. 현재 워크플로의 배포 포트는 8081이다. 다른 서비스가 이 포트를 점유하면 안 된다. 외부 서버를 사용할 경우 서버 방화벽과 클라우드 보안 그룹의 인바운드 포트도 확인한다. 이 구성은 실습용 HTTP이며 HTTPS는 도메인과 인증서를 연결하는 추가 설정이 필요하다.
 
 GitHub Settings → Actions → Runners → New self-hosted runner의 Linux x64 설치 명령을 서버에서 실행한다. Runner 사용자에게 Docker 명령 권한이 있어야 하며 사용자 정의 라벨 `strikelab`을 추가한다. Runner를 서비스로 등록한다. GitHub Environment `hw3-production`을 만들고 배포 브랜치를 main으로 제한한다.
 
@@ -35,7 +35,7 @@ GitHub Settings → Actions → Runners → New self-hosted runner의 Linux x64 
 
 Runner와 Docker daemon은 같은 Linux 호스트에서 실행해야 한다. 원격 Docker context나 컨테이너 내부 Runner는 이 경로 마운트 구성을 그대로 사용할 수 없다.
 
-서버 상태 디렉터리는 Runner 사용자의 `~/.local/share/strikelab`이며 배포 도중 바꾸거나 지우면 안 된다. 최초 배포 이후 포트도 8080으로 유지한다. 서버 준비 후 `HW3_DEPLOY_ENABLED=true`를 설정한다.
+서버 상태 디렉터리는 Runner 사용자의 `~/.local/share/strikelab`이며 배포 도중 바꾸거나 지우면 안 된다. 최초 배포 이후 포트도 8081로 유지한다. 수동 실행 시에도 `--port 8081`을 지정한다. 서버 준비 후 `HW3_DEPLOY_ENABLED=true`를 설정한다.
 
 ## 4. 전환과 복구
 
@@ -51,7 +51,7 @@ Runner와 Docker daemon은 같은 Linux 호스트에서 실행해야 한다. 원
 수동으로 이전 버전을 재배포할 때도 이전 digest와 그 이미지의 정확한 커밋 SHA를 사용한다. 아래 대문자 값은 실제 값으로 교체한다.
 
 ```sh
-python3 deploy/deploy.py USER/strikelab@sha256:PREVIOUS_DIGEST PREVIOUS_COMMIT_SHA
+python3 deploy/deploy.py USER/strikelab@sha256:PREVIOUS_DIGEST PREVIOUS_COMMIT_SHA --port 8081
 ```
 
 ## 5. 무중단 전환 증빙
@@ -59,7 +59,7 @@ python3 deploy/deploy.py USER/strikelab@sha256:PREVIOUS_DIGEST PREVIOUS_COMMIT_S
 첫 배포가 정상 실행된 상태에서 별도 터미널에서 검사기를 실행하고, 검사 중 앱 문구를 수정해 main에 push한다. 180초 안에 배포가 끝나지 않으면 시간을 늘려 전환 전후 전체 구간을 포함한다.
 
 ```sh
-python3 deploy/probe.py http://SERVER_IP:8080 --seconds 180 --output artifacts/availability.json
+python3 deploy/probe.py http://SERVER_IP:8081 --seconds 180 --output artifacts/availability.json
 ```
 
 이 도구는 반복해서 HTML, 참조 JS/CSS, 이전 샘플에서 본 에셋과 버전 응답을 확인한다. 오류가 있으면 종료 코드 1을 반환한다. 결과에서 `failures: 0`뿐 아니라 `releases`에 이전·새 SHA 둘 다 있어야 실제 전환을 관측한 것이다. 한 버전만 있으면 배포 구간을 검증한 증거가 아니다. 일정 간격의 샘플링이며 모든 순간의 무중단이나 3D 브라우저 렌더링까지 증명하지는 않는다. 브라우저의 기술 선택·재생도 별도 확인한다.

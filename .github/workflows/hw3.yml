@@ -67,4 +67,4 @@ jobs:
       - name: Verify candidate and switch traffic
         env:
           IMAGE: ${{ needs.image.outputs.image }}
-        run: python3 deploy/deploy.py "$IMAGE" "$GITHUB_SHA"
+        run: python3 deploy/deploy.py "$IMAGE" "$GITHUB_SHA" --port 8081
